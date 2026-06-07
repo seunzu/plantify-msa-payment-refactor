@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: transaction
+  datasource:
+    url: ${TRANSACTION_DATASOURCE_URL:jdbc:h2:mem:transaction;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1}
+    username: ${TRANSACTION_DATASOURCE_USERNAME:sa}
+    password: ${TRANSACTION_DATASOURCE_PASSWORD:}
+    driver-class-name: ${TRANSACTION_DATASOURCE_DRIVER:org.h2.Driver}
+  jpa:
+    database-platform: ${TRANSACTION_JPA_DIALECT:org.hibernate.dialect.H2Dialect}
+    show-sql: ${TRANSACTION_JPA_SHOW_SQL:false}
+    hibernate:
+      ddl-auto: ${TRANSACTION_JPA_DDL_AUTO:create-drop}
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    admin:
+      auto-create: true
+    consumer:
+      group-id: ${TRANSACTION_KAFKA_GROUP_ID:transaction-service-group}
+      auto-offset-reset: earliest
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topic:
+      transaction-status: ${TRANSACTION_STATUS_TOPIC:transaction-status}
+
+redisson:
+  redlock:
+    servers:
+      - ${REDISSON_REDIS_1:redis://localhost:6379}
+      - ${REDISSON_REDIS_2:redis://localhost:6380}
+      - ${REDISSON_REDIS_3:redis://localhost:6381}
+
+auth:
+  service:
+    url: ${AUTH_SERVICE_URL:http://localhost:8081}
+payment:
+  service:
+    url: ${PAYMENT_SERVICE_URL:http://localhost:8084}
+
+client:
+  base:
+    url: ${CLIENT_BASE_URL:http://localhost:3000}
+  pay:
+    url: ${CLIENT_PAY_URL:http://localhost:3000/payments}
+
+server:
+  port: ${TRANSACTION_SERVER_PORT:8083}
