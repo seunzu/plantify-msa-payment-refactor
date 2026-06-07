@@ -40,7 +40,9 @@ public class SecurityConfig {
                                 "/v1/pay/settlements/external",
                                 "/v1/pay/check",
                                 "/v1/pay/refund",
-                                "/v1/pay/cancellation"
+                                "/v1/pay/cancellation",
+                                "/v1/pay/debit",
+                                "/v1/pay/credit"
                         ).permitAll()
                         .anyRequest()
                         .authenticated()

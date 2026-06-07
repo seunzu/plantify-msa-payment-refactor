@@ -20,7 +20,7 @@ public enum PaymentErrorCode implements ErrorCode {
     EXPIRED_PAYMENT("P009", "결제가 만료되었습니다.", HttpStatus.BAD_REQUEST),
     INVALID_PAYMENT_STATUS("P010", "유효하지 않은 결제 상태입니다.", HttpStatus.BAD_REQUEST),
     CONCURRENT_UPDATE("P011", "동시에 처리 중인 요청이 있습니다.", HttpStatus.CONFLICT),
-    LEDGER_DEBIT_FAILED("P012", "잔액 차감 처리에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    LEDGER_DEBIT_FAILED("P012", "잔액 차감 처리에 실패했습니다.", HttpStatus.PAYMENT_REQUIRED),
     LEDGER_CREDIT_FAILED("P013", "잔액 복원 처리에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     TRANSACTION_CONFIRM_FAILED("P014", "거래 확정 처리에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 

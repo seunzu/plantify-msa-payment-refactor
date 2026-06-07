@@ -26,4 +26,7 @@ public interface PaySettlementRepository extends JpaRepository<PaySettlement, Lo
                                         @Param("month") int month,
                                         @Param("year") int year);
 
+    Optional<PaySettlement> findByTransactionId(Long transactionId);
+    boolean existsByTransactionId(Long transactionId);
+    boolean existsByTransactionIdAndStatus(Long transactionId, Status status);
 }

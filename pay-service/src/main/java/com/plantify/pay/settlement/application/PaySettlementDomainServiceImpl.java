@@ -22,14 +22,32 @@ public class PaySettlementDomainServiceImpl implements PaySettlementDomainServic
     private final PayRepository payRepository;
 
     @Override
+    public boolean existsByTransactionId(Long transactionId) {
+        return paySettlementRepository.existsByTransactionId(transactionId);
+    }
+
+    @Override
+    public boolean existsByTransactionIdAndStatus(Long transactionId, Status status) {
+        return paySettlementRepository.existsByTransactionIdAndStatus(transactionId, status);
+    }
+
+    @Override
+    @Transactional
+    public void updateSettlementStatusByTransactionId(Long transactionId, Status status) {
+        paySettlementRepository.findByTransactionId(transactionId)
+                .ifPresent(settlement ->
+                        paySettlementRepository.save(settlement.updateStatus(status))
+                );
+    }
+
+    @Override
     @Transactional
     public void savePaySettlement(PaySettlementRequest request) {
         Long userId = request.userId();
         Pay pay = payRepository.findByUserId(userId)
                 .orElseThrow(() -> new ApplicationException(PayErrorCode.PAY_NOT_FOUND));
 
-        PaySettlement savedPaySettlement = request.toEntity(pay);
-        paySettlementRepository.save(savedPaySettlement);
+        paySettlementRepository.save(request.toEntity(pay));
     }
 
     @Override

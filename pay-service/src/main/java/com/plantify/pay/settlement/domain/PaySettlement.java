@@ -29,6 +29,9 @@ public class PaySettlement extends BaseEntity {
     @Column(nullable = false)
     private Status status;
 
+    @Column(nullable = false, unique = true)
+    private Long transactionId;
+
     @Column
     private String orderId;
 

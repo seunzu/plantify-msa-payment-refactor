@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v1/auth/validate-token"
+  },
+  "priority": 10,
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "success": true,
+      "code": "SUCCESS",
+      "message": "요청이 성공적으로 처리되었습니다.",
+      "data": {
+        "userId": 1,
+        "role": "USER"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 package com.plantify.pay.global.util;
 
+import lombok.RequiredArgsConstructor;
 import org.redisson.RedissonRedLock;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;

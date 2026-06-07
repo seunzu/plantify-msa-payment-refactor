@@ -1,6 +1,7 @@
 package com.plantify.pay.ledger.application;
 
 import com.plantify.pay.account.dto.AccountRequest;
+import com.plantify.pay.ledger.dto.CreditRequest;
 import com.plantify.pay.ledger.dto.PayRequest;
 import com.plantify.pay.ledger.dto.PayResponse;
 import com.plantify.pay.ledger.domain.Pay;
@@ -13,7 +14,6 @@ import com.plantify.pay.account.repository.AccountRepository;
 import com.plantify.pay.ledger.repository.PayRepository;
 import com.plantify.pay.point.repository.PointRepository;
 import com.plantify.pay.account.application.AccountService;
-import com.plantify.pay.ledger.application.ledger.LedgerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -76,7 +76,7 @@ public class PayServiceImpl implements PayService {
     @Override
     @Transactional
     public Pay rechargeBalance(Long userId, Long amount) {
-        ledgerService.credit(userId, amount, 0L);
+        ledgerService.credit(new CreditRequest(userId, amount, 0L));
         return payRepository.findByUserId(userId)
                 .orElseThrow(() -> new ApplicationException(PayErrorCode.PAY_NOT_FOUND));
     }

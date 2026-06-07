@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v1/auth/validate-token",
+    "headers": {
+      "Authorization": {
+        "equalTo": "Bearer test-token-2"
+      }
+    }
+  },
+  "priority": 1,
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "success": true,
+      "code": "SUCCESS",
+      "message": "요청이 성공적으로 처리되었습니다.",
+      "data": {
+        "userId": 2,
+        "role": "USER"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

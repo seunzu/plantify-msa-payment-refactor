@@ -19,24 +19,24 @@ public class RedissonConfig {
     @Value("${redisson.redlock.servers[2]}")
     private String redis3;
 
-    @Bean(name = "redissonClient1", destroyMethod = "shutdown")
+    @Bean("redissonClient1")
     public RedissonClient redissonClient1() {
-        return createClient(redis1);
-    }
-
-    @Bean(name = "redissonClient2", destroyMethod = "shutdown")
-    public RedissonClient redissonClient2() {
-        return createClient(redis2);
-    }
-
-    @Bean(name = "redissonClient3", destroyMethod = "shutdown")
-    public RedissonClient redissonClient3() {
-        return createClient(redis3);
-    }
-
-    private RedissonClient createClient(String address) {
         Config config = new Config();
-        config.useSingleServer().setAddress(address);
+        config.useSingleServer().setAddress(redis1);
+        return Redisson.create(config);
+    }
+
+    @Bean("redissonClient2")
+    public RedissonClient redissonClient2() {
+        Config config = new Config();
+        config.useSingleServer().setAddress(redis2);
+        return Redisson.create(config);
+    }
+
+    @Bean("redissonClient3")
+    public RedissonClient redissonClient3() {
+        Config config = new Config();
+        config.useSingleServer().setAddress(redis3);
         return Redisson.create(config);
     }
 }

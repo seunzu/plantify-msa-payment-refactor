@@ -5,6 +5,7 @@ import com.plantify.pay.settlement.domain.PaySettlement;
 import com.plantify.pay.ledger.domain.Status;
 
 public record PaySettlementRequest(
+        Long transactionId,
         Long userId,
         String orderId,
         String orderName,
@@ -16,6 +17,7 @@ public record PaySettlementRequest(
     public PaySettlement toEntity(Pay pay) {
         return PaySettlement.builder()
                 .pay(pay)
+                .transactionId(transactionId)
                 .status(status)
                 .orderId(orderId)
                 .orderName(orderName)

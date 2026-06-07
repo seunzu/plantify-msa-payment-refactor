@@ -34,7 +34,10 @@ public class Point extends BaseEntity {
     }
 
     public Point validatePoint(long use){
-        if (this.pointBalance < use && pointBalance > 0) {
+        if (use < 0) {
+            throw new ApplicationException(PointErrorCode.INVALID_POINT_OPERATION);
+        }
+        if (this.pointBalance < use) {
             throw new ApplicationException(PointErrorCode.INSUFFICIENT_POINTS);
         }
         return this;

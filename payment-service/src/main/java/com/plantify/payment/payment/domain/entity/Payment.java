@@ -33,6 +33,9 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private Long amount;
 
+    @Column(nullable = false)
+    private Long pointUsed;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Method method;
@@ -49,7 +52,13 @@ public class Payment extends BaseEntity {
         return this;
     }
 
-    public void updateStatus(Status status) {
+    public Payment updateStatus(Status status) {
         this.status = status;
+        return this;
+    }
+
+    public Payment updatePointUsed(Long pointUsed) {
+        this.pointUsed = pointUsed;
+        return this;
     }
 }

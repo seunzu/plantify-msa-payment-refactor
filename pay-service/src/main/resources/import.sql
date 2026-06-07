@@ -1,0 +1,10 @@
+INSERT INTO pay (userid, paynum, expirydate, balance, status, createdat, updatedat) VALUES (1, 1234567890123456, '2031-01-01 00:00:00', 500000, NULL, NOW(), NOW());
+INSERT INTO pay (userid, paynum, expirydate, balance, status, createdat, updatedat) VALUES (2, 1234567890123457, '2031-01-01 00:00:00', 500000, NULL, NOW(), NOW());
+INSERT INTO pay (userid, paynum, expirydate, balance, status, createdat, updatedat) VALUES (3, 1234567890123458, '2031-01-01 00:00:00', 500000, NULL, NOW(), NOW());
+INSERT INTO pay (userid, paynum, expirydate, balance, status, createdat, updatedat) VALUES (4, 1234567890123459, '2031-01-01 00:00:00', 500000, NULL, NOW(), NOW());
+INSERT INTO pay (userid, paynum, expirydate, balance, status, createdat, updatedat) VALUES (5, 1234567890123460, '2031-01-01 00:00:00', 500000, NULL, NOW(), NOW());
+INSERT INTO point (userid, pointbalance, createdat, updatedat) VALUES (1, 0, NOW(), NOW());
+INSERT INTO point (userid, pointbalance, createdat, updatedat) VALUES (2, 0, NOW(), NOW());
+INSERT INTO point (userid, pointbalance, createdat, updatedat) VALUES (3, 0, NOW(), NOW());
+INSERT INTO point (userid, pointbalance, createdat, updatedat) VALUES (4, 0, NOW(), NOW());
+INSERT INTO point (userid, pointbalance, createdat, updatedat) VALUES (5, 0, NOW(), NOW());

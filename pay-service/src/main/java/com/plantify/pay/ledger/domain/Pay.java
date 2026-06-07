@@ -69,7 +69,7 @@ public class Pay extends BaseEntity {
     }
 
     public Pay success(long amount) {
-        this.status = Status.SUCCESS;
+        this.status = Status.APPROVED;
         this.balance -= amount;
         return this;
     }

@@ -45,8 +45,8 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	// security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	// redis
-	implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
+	// kafka
+	implementation 'org.springframework.kafka:spring-kafka'
 }
 
 dependencyManagement {

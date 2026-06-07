@@ -13,13 +13,14 @@ spring:
       ddl-auto: ${PAYMENT_JPA_DDL_AUTO:create-drop}
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-
-redisson:
-  redlock:
-    servers:
-      - ${REDISSON_REDIS_1:redis://localhost:6379}
-      - ${REDISSON_REDIS_2:redis://localhost:6380}
-      - ${REDISSON_REDIS_3:redis://localhost:6381}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    topic:
+      payment-approved: ${PAYMENT_APPROVED_TOPIC:payment-approved}
 
 auth:
   service:
@@ -36,6 +37,10 @@ client:
     url: ${CLIENT_BASE_URL:http://localhost:3000}
   pay:
     url: ${CLIENT_PAY_URL:http://localhost:3000/payments}
+
+jwt:
+  secret: ${PAYMENT_JWT_SECRET:local-payment-secret-key}
+  access-token-expiration: ${PAYMENT_JWT_ACCESS_TOKEN_EXPIRATION:3600000}
 
 server:
   port: ${PAYMENT_SERVER_PORT:8084}

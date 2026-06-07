@@ -3,7 +3,6 @@ package com.plantify.pay.ledger.dto.process;
 import java.util.UUID;
 
 public record TransactionRequest(
-        Long userId,
         Long sellerId,
         String orderId,
         String orderName,
@@ -11,9 +10,8 @@ public record TransactionRequest(
         String redirectUri
 ) {
 
-    public static TransactionRequest from(PendingTransactionRequest request, Long userId) {
+    public static TransactionRequest from(PendingTransactionRequest request) {
         return new TransactionRequest(
-                userId,
                 request.sellerId(),
                 UUID.randomUUID().toString(),
                 request.orderName(),

@@ -1,8 +1,7 @@
 package com.plantify.transaction.transaction.controller;
 
-import com.plantify.transaction.transaction.dto.request.PayTransactionRequest;
+import com.plantify.transaction.transaction.dto.request.TransactionConfirmRequest;
 import com.plantify.transaction.transaction.dto.request.TransactionRequest;
-import com.plantify.transaction.transaction.dto.request.UpdateTransactionRequest;
 import com.plantify.transaction.transaction.dto.response.TransactionResponse;
 import com.plantify.transaction.transaction.domain.Status;
 import com.plantify.transaction.global.response.ApiResponse;
@@ -22,41 +21,40 @@ public class TransactionController {
     // 트랜잭션 조회
     @GetMapping("/{transactionId}")
     public ApiResponse<TransactionResponse> getTransactionById(@PathVariable Long transactionId) {
-        TransactionResponse response = transactionService.getTransactionById(transactionId);
-        return ApiResponse.ok(response);
+        return ApiResponse.ok(transactionService.getTransactionById(transactionId));
     }
 
     // 트랜잭션 존재 여부 확인
     @GetMapping("/exist")
-    public boolean existTransaction(@RequestParam Long userId, @RequestParam String orderId, @RequestParam List<Status> statusList) {
-        return transactionService.existTransaction(userId, orderId, statusList);
+    public ApiResponse<Boolean> existTransaction(
+            @RequestParam Long userId,
+            @RequestParam String orderId,
+            @RequestParam List<Status> statusList) {
+        return ApiResponse.ok(transactionService.existTransaction(userId, orderId, statusList));
     }
 
-    // 대기 트랜잭션 생성(PENDING)
+    // PENDING 생성
     @PostMapping
     public ApiResponse<TransactionResponse> createPendingTransaction(@RequestBody TransactionRequest request) {
-        TransactionResponse response = transactionService.createPendingTransaction(request);
-        return ApiResponse.ok(response);
+        return ApiResponse.ok(transactionService.createPendingTransaction(request));
     }
 
-    // 결제 트랜잭션(PNEDING -> SUCESS)
-    @PostMapping("/payments")
-    public ApiResponse<TransactionResponse> updateTransactionToSuccess(@RequestBody PayTransactionRequest request) {
-        TransactionResponse response = transactionService.updateTransactionToSuccess(request);
-        return ApiResponse.ok(response);
+    // Payment Orchestrator
+    // PENDING -> COMPLETED
+    @PostMapping("/confirm")
+    public ApiResponse<TransactionResponse> confirmPayment(@RequestBody TransactionConfirmRequest request) {
+        return ApiResponse.ok(transactionService.confirmPayment(request));
     }
 
-    // 환불 트랜잭션(SUCCESS -> REFUND)
+    // COMPLETED -> REFUNDED
     @PostMapping("/refunds")
-    public ApiResponse<TransactionResponse> updateTransactionToRefund(@RequestBody UpdateTransactionRequest request) {
-        TransactionResponse response = transactionService.updateTransactionToRefund(request);
-        return ApiResponse.ok(response);
+    public ApiResponse<TransactionResponse> confirmRefund(@RequestBody TransactionConfirmRequest request) {
+        return ApiResponse.ok(transactionService.confirmRefund(request));
     }
 
-    // 취소 트랜잭션(PENDING -> CANCELLED)
+    // PENDING -> CANCELLED
     @PostMapping("/cancellations")
-    public ApiResponse<TransactionResponse> updatePayTransactionToCancellation(@RequestBody UpdateTransactionRequest request) {
-        TransactionResponse response = transactionService.updateTransactionToCancellation(request);
-        return ApiResponse.ok(response);
+    public ApiResponse<TransactionResponse> confirmCancellation(@RequestBody TransactionConfirmRequest request) {
+        return ApiResponse.ok(transactionService.confirmCancellation(request));
     }
 }

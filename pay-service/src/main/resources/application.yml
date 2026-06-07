@@ -20,13 +20,15 @@ spring:
     consumer:
       group-id: ${PAY_KAFKA_GROUP_ID:pay-service-group}
       auto-offset-reset: earliest
-      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.ByteArrayDeserializer
+        spring.json.trusted.packages: "com.plantify.pay.ledger.dto.process"
+        spring.json.value.default.type: com.plantify.pay.ledger.dto.process.PaymentApprovedEvent
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     topic:
       transaction-status: ${TRANSACTION_STATUS_TOPIC:transaction-status}
+      payment-approved: ${PAYMENT_APPROVED_TOPIC:payment-approved}
 
 redisson:
   redlock:
@@ -44,10 +46,6 @@ transaction:
 apiuser:
   service:
     url: ${APIUSER_SERVICE_URL:http://localhost:8085}
-
-jwt:
-  secret: ${PAY_JWT_SECRET:local-payment-secret-key}
-  access-token-expiration: ${PAY_JWT_ACCESS_TOKEN_EXPIRATION:3600000}
 
 client:
   base:
