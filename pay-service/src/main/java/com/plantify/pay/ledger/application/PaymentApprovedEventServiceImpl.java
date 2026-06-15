@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class PayTransactionStatusServiceImpl implements PayTransactionStatusService {
+public class PaymentApprovedEventServiceImpl implements PaymentApprovedEventService {
 
     private final LedgerService ledgerService;
     private final PaySettlementDomainService paySettlementDomainService;

@@ -128,8 +128,7 @@ public class PaymentOrchestratorImpl implements PaymentOrchestrator {
         } catch (Exception e) {
             log.error("잔액 차감 실패. paymentId={}, transactionId={}, error={}",
                     payment.getPaymentId(), transactionId, e.getMessage());
-            payment.updateStatus(Status.FAILED);
-            paymentRepository.save(payment);
+            markPaymentFailedAndConfirmTransactionFailure(payment, "잔액 차감 처리에 실패했습니다.");
             throw new ApplicationException(PaymentErrorCode.LEDGER_DEBIT_FAILED);
         }
 
@@ -159,8 +158,7 @@ public class PaymentOrchestratorImpl implements PaymentOrchestrator {
                         payment.getPaymentId(), transactionId, creditEx.getMessage());
             }
 
-            payment.updateStatus(Status.FAILED);
-            paymentRepository.save(payment);
+            markPaymentFailedAndConfirmTransactionFailure(payment, "거래 확정 처리에 실패했습니다.");
             throw new ApplicationException(PaymentErrorCode.TRANSACTION_CONFIRM_FAILED);
         }
 
@@ -183,6 +181,21 @@ public class PaymentOrchestratorImpl implements PaymentOrchestrator {
 
         if (mismatched) {
             throw new ApplicationException(PaymentErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+    }
+
+    private void markPaymentFailedAndConfirmTransactionFailure(Payment payment, String reason) {
+        payment.updateStatus(Status.FAILED);
+        payment.updateReason(reason);
+        paymentRepository.save(payment);
+
+        try {
+            transactionServiceClient.fail(
+                    new TransactionConfirmRequest(payment.getTransactionId(), payment.getPaymentId())
+            );
+        } catch (Exception e) {
+            log.error("거래 실패 확정 실패. 수동 처리 필요. paymentId={}, transactionId={}, error={}",
+                    payment.getPaymentId(), payment.getTransactionId(), e.getMessage());
         }
     }
 }

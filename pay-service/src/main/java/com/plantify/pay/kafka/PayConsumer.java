@@ -1,7 +1,7 @@
 package com.plantify.pay.kafka;
 
 import com.plantify.pay.ledger.dto.process.PaymentApprovedEvent;
-import com.plantify.pay.ledger.application.PayTransactionStatusService;
+import com.plantify.pay.ledger.application.PaymentApprovedEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PayConsumer {
 
-    private final PayTransactionStatusService payTransactionStatusService;
+    private final PaymentApprovedEventService paymentApprovedEventService;
 
     @KafkaListener(
             topics = "${spring.kafka.topic.payment-approved}",
@@ -21,10 +21,10 @@ public class PayConsumer {
     )
     public void handlePaymentApproved(ConsumerRecord<String, PaymentApprovedEvent> record) {
         PaymentApprovedEvent event = record.value();
-        log.info("PaymentApprovedEvent 수신. paymentId={}, transactionId={}",
-                event.paymentId(), event.transactionId());
         try {
-            payTransactionStatusService.processApprovedPayment(event);
+            log.info("PaymentApprovedEvent 수신. paymentId={}, transactionId={}",
+                    event.paymentId(), event.transactionId());
+            paymentApprovedEventService.processApprovedPayment(event);
         } catch (Exception e) {
             log.error("Consumer 처리 실패. paymentId={}, transactionId={}, error={}",
                     event.paymentId(), event.transactionId(), e.getMessage());

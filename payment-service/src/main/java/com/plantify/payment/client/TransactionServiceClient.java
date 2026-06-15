@@ -34,4 +34,8 @@ public interface TransactionServiceClient {
     // 취소 확정 (PENDING -> CANCELLED)
     @PostMapping("/v1/transactions/cancellations")
     TransactionResponse cancel(@RequestBody TransactionConfirmRequest request);
+
+    // 결제 대기 만료 확정 (PENDING -> FAILED)
+    @PostMapping("/v1/transactions/failures")
+    TransactionResponse fail(@RequestBody TransactionConfirmRequest request);
 }

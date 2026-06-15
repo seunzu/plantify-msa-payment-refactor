@@ -84,13 +84,9 @@ services:
       context: ./transaction-service
     container_name: plantify-transaction-service
     environment:
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       PAYMENT_SERVICE_URL: http://payment-service:8084
     ports:
       - "8083:8083"
-    depends_on:
-      kafka:
-        condition: service_started
 
   payment-service:
     build:

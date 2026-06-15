@@ -26,9 +26,13 @@ Client
       -> transaction-service
 ```
 
-`payment-service`가 오케스트레이터가 되고, `pay-service`는 Ledger 책임으로 축소. 금전 변경은 `userId` 기준 Redis 분산락으로 직렬화하고, 중복 요청은 `transactionId` unique constraint로 제어
+`payment-service`가 오케스트레이터가 되고, `pay-service`는 Ledger 책임으로 축소. 금전 변경은 `userId` 기준 Redis 분산락으로 직렬화하고, 결제 진입 중복은 `orderId` unique constraint로 제어
 
 결제 시작 시 `payment-service`가 `transaction-service`에 Transaction PENDING 생성을 요청하고, 반환된 `transactionId`로 Payment PENDING을 저장. 결제 확정 시에는 Transaction PENDING 상태를 사전 확인한 뒤 Ledger 차감과 Transaction 확정을 순서대로 조율
+
+결제 실패도 `payment-service`가 조율한다. Ledger debit 실패 또는 Transaction confirm 실패 시 Payment를 FAILED로 저장하고, `transaction-service`에 Transaction FAILED 전이를 요청한다. debit 이후 confirm이 실패한 경우에는 Pay credit으로 잔액/포인트를 복원한다.
+
+결제 대기 만료도 `payment-service`가 판단한다. 만료된 Payment PENDING을 찾은 뒤 Transaction이 아직 PENDING이면 `transaction-service`에 FAILED 전이를 요청하고 Payment도 FAILED로 저장한다.
 
 ---
 
@@ -66,9 +70,11 @@ payment/pay service
 
 | 관심사 | 전략 |
 | --- | --- |
-| 중복 결제 요청 | `transactionId` unique constraint |
+| 중복 결제 진입 | `Transaction.orderId`, `Payment.orderId` unique constraint |
+| Ledger 재시도 멱등성 | `PaySettlement.transactionId` exists check + unique constraint |
 | 동일 사용자 동시 차감 | `ledger:{userId}` Redis 분산락 |
 | 상태 전이 | Transaction 상태 검증 후 전이 |
-| 비동기 후처리 | `PaymentApproved` Kafka 이벤트 |
-| 부분 실패 복원 | Transaction confirm 실패 시 보상 트랜잭션(credit) 실행 |
+| 비동기 후처리 | `payment-service`가 발행하는 `PaymentApproved` Kafka 이벤트 |
+| 결제 대기 만료 | `payment-service` 스케줄러가 Payment/Transaction FAILED 조율 |
+| 부분 실패 복원 | Transaction confirm 실패 시 보상 트랜잭션(credit) 실행 후 Transaction FAILED 요청 |
 | 고도화 대상 | Outbox, DLQ, credit 멱등성 |

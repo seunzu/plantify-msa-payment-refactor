@@ -1,6 +1,5 @@
 package com.plantify.transaction.transaction.application;
 
-import com.plantify.transaction.transaction.dto.TransactionStatusMessage;
 import com.plantify.transaction.transaction.dto.request.TransactionConfirmRequest;
 import com.plantify.transaction.transaction.dto.request.TransactionRequest;
 import com.plantify.transaction.transaction.dto.response.TransactionResponse;
@@ -8,7 +7,6 @@ import com.plantify.transaction.transaction.domain.Status;
 import com.plantify.transaction.transaction.domain.Transaction;
 import com.plantify.transaction.global.exception.ApplicationException;
 import com.plantify.transaction.global.exception.errorcode.TransactionErrorCode;
-import com.plantify.transaction.kafka.TransactionProvider;
 import com.plantify.transaction.transaction.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +22,6 @@ import java.util.List;
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final TransactionProvider transactionProvider;
 
     @Override
     public TransactionResponse getTransactionById(Long transactionId) {
@@ -71,10 +68,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         transactionRepository.save(transaction);
 
-        transactionProvider.sendTransactionStatusMessage(
-                TransactionStatusMessage.from(transaction)
-        );
-
         return TransactionResponse.from(transaction);
     }
 
@@ -93,10 +86,6 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.updateStatus(Status.REFUNDED);
 
         transactionRepository.save(transaction);
-
-        transactionProvider.sendTransactionStatusMessage(
-                TransactionStatusMessage.from(transaction)
-        );
 
         return TransactionResponse.from(transaction);
     }
@@ -117,29 +106,24 @@ public class TransactionServiceImpl implements TransactionService {
 
         transactionRepository.save(transaction);
 
-        transactionProvider.sendTransactionStatusMessage(
-                TransactionStatusMessage.from(transaction)
-        );
-
         return TransactionResponse.from(transaction);
     }
 
-    // 스케줄러용 — 5분 이상 PENDING 상태 만료 처리
+    // PENDING -> FAILED
+    // Payment Orchestrator가 결제 대기 만료를 판단한 뒤 호출
     @Override
     @Transactional
-    public void failExpiredTransaction(Long transactionId) {
-        Transaction transaction = transactionRepository.findById(transactionId)
+    public TransactionResponse confirmFailure(TransactionConfirmRequest request) {
+        Transaction transaction = transactionRepository.findById(request.transactionId())
                 .orElseThrow(() -> new ApplicationException(TransactionErrorCode.TRANSACTION_NOT_FOUND));
 
         if (transaction.getStatus() != Status.PENDING) {
-            return;
+            throw new ApplicationException(TransactionErrorCode.INVALID_TRANSACTION_STATUS);
         }
 
         transaction.updateStatus(Status.FAILED);
         transactionRepository.save(transaction);
 
-        transactionProvider.sendTransactionStatusMessage(
-                TransactionStatusMessage.from(transaction)
-        );
+        return TransactionResponse.from(transaction);
     }
 }

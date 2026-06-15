@@ -34,6 +34,7 @@ docker compose up --build redis zookeeper kafka pay-service transaction-service 
 ```
 
 `auth-service` is not included in this repository. At runtime, `AUTH_SERVICE_URL` defaults to `http://host.docker.internal:8081`.
+In the provided Docker Compose environment, `mock-auth` replaces auth-service for local consistency tests. `pay-service` listens on `8082` inside the Docker network and is exposed as `18082` on the host to avoid local port conflicts.
 
 Verify compilation per service:
 
@@ -66,3 +67,4 @@ This repository currently has CI only. There is no CD target because this lab do
 - [Concurrency test plan](docs/concurrency-test-plan.md)
 - [Idempotency test plan](docs/idempotency-test-plan.md)
 - [Failure scenario test plan](docs/failure-scenario-test-plan.md)
+- [Test report](docs/test-report.md)

@@ -31,6 +31,10 @@ pay:
 transaction:
   service:
     url: ${TRANSACTION_SERVICE_URL:http://localhost:8083}
+payment:
+  expiration:
+    pending-minutes: ${PAYMENT_PENDING_EXPIRATION_MINUTES:5}
+    schedule-delay-ms: ${PAYMENT_EXPIRATION_SCHEDULE_DELAY_MS:300000}
 
 client:
   base:

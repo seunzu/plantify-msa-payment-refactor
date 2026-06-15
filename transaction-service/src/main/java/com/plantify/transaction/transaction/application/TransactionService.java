@@ -16,6 +16,5 @@ public interface TransactionService {
     TransactionResponse confirmPayment(TransactionConfirmRequest request);
     TransactionResponse confirmRefund(TransactionConfirmRequest request);
     TransactionResponse confirmCancellation(TransactionConfirmRequest request);
-
-    void failExpiredTransaction(Long transactionId);
+    TransactionResponse confirmFailure(TransactionConfirmRequest request);
 }

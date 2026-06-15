@@ -27,7 +27,6 @@ spring:
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     topic:
-      transaction-status: ${TRANSACTION_STATUS_TOPIC:transaction-status}
       payment-approved: ${PAYMENT_APPROVED_TOPIC:payment-approved}
 
 redisson:

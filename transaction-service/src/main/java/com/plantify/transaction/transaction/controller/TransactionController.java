@@ -57,4 +57,10 @@ public class TransactionController {
     public ApiResponse<TransactionResponse> confirmCancellation(@RequestBody TransactionConfirmRequest request) {
         return ApiResponse.ok(transactionService.confirmCancellation(request));
     }
+
+    // PENDING -> FAILED
+    @PostMapping("/failures")
+    public ApiResponse<TransactionResponse> confirmFailure(@RequestBody TransactionConfirmRequest request) {
+        return ApiResponse.ok(transactionService.confirmFailure(request));
+    }
 }

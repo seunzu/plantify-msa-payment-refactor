@@ -47,8 +47,9 @@ v2에서는 Pay 중심 구조를 유지하면서 Redis 분산락과 `transaction
 
 ```text
 Payment(Orchestrator)
+  -> Transaction(PENDING 생성/확인)
   -> Pay(Ledger)
-  -> Transaction
+  -> Transaction(COMPLETED 확정)
 ```
 
 v3에서는 Payment를 결제 흐름의 오케스트레이터로 두고, Pay는 금전 원장 변경 책임으로 축소
@@ -56,6 +57,9 @@ v3에서는 Payment를 결제 흐름의 오케스트레이터로 두고, Pay는 
 ### 핵심 판단
 
 ```text
-transactionId = 재시도/중복 호출 방지용 멱등 키
+orderId = 결제 진입 중복 방지용 비즈니스 키
+transactionId = Ledger 재시도/중복 차감 방지용 멱등 키
 userId = 잔액이라는 공유 자원 보호용 락 키
 ```
+
+결제 시작 시 `payment-service`가 `transaction-service`에 Transaction PENDING 생성을 요청하고, 반환된 `transactionId`로 Payment PENDING을 저장한다. 결제 확정 시에는 Transaction PENDING 상태를 확인한 뒤 Pay Ledger 차감, Transaction 확정, Payment APPROVED 저장, `PaymentApproved` 이벤트 발행 순서로 진행한다. 결제 실패와 대기 만료 역시 Payment 오케스트레이터가 판단하고 Transaction FAILED 전이를 요청한다.

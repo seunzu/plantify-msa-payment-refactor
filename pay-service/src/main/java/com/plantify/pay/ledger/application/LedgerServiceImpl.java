@@ -81,7 +81,7 @@ public class LedgerServiceImpl implements LedgerService {
         });
     }
 
-    // 결제 완료 후 포인트 적립 (Kafka COMPLETED 이벤트 수신)
+    // 결제 완료 후 포인트 적립 (PaymentApproved 이벤트 수신)
     @Override
     @Transactional
     public void reward(Long userId, long rewardPoint) {
