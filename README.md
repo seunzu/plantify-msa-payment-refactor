@@ -1,107 +1,66 @@
 # plantify-msa-payment-refactor
 
-Local lab for comparing two payment system architectures in a Spring Boot MSA.
+Spring Boot MSA 기반 자체 Pay 결제 시스템의 책임 분리 리팩터링 실험 레포
 
-- Baseline (`main`): `pay-service` owns orchestration, ledger, and settlement together. Distributed locks are scoped per service, leaving the same resource unprotected across service boundaries.
-- Refactor target (`refactor/payment-orchestration-saga`): `payment-service` becomes the orchestrator. `pay-service` is reduced to ledger responsibility only. Monetary changes are serialized with a `userId`-scoped Redis lock. Duplicate payment entry is rejected by `orderId` unique constraints, and Ledger retries are guarded by `transactionId`. Payment failure and expiration are also coordinated by `payment-service`, which requests Transaction `FAILED` transitions.
+- Baseline (`main`, v2): `pay-service`가 결제 진입점, 오케스트레이터, Ledger를 함께 담당
+- Refactor target (`refactor/payment-orchestration-saga`, v3): `payment-service`가 결제 흐름을 조율하고 `pay-service`는 Ledger 변경에 집중
 
-## Services
+## 핵심 변경
 
-- `payment-service`: payment entry point, orchestrates pay/refund/cancel/failure/expiration flows, manages Payment state, publishes `PaymentApproved`.
-- `pay-service`: Pay balance, points, settlement records, ledger lock, consumes `PaymentApproved` for post-payment rewards.
-- `transaction-service`: transaction creation and final state transitions only. It does not publish Kafka events in the refactor branch.
-- `experiments/k6`: consistency and concurrency test scripts. (`refactor/payment-orchestration-saga` only)
-- `docs`: architecture, sequence diagrams, and consistency strategy notes. (`refactor/payment-orchestration-saga` only)
+- `payment-service`를 자체 PG 오케스트레이터로 배치
+- `pay-service`를 잔액, 포인트, 정산 Ledger 책임으로 축소
+- `transaction-service`를 거래 생성과 최종 상태 전이 책임으로 정리
+- `orderId` unique constraint로 중복 결제 진입 방지
+- `PaySettlement.transactionId`로 Ledger 중복 차감 방어
+- `ledger:{userId}` Redis lock으로 동일 사용자 금전 변경 직렬화
+- Transaction confirm 실패 시 Pay credit 보상 시도
 
-## Auth assumption
+## 서비스
 
-Both branches delegate token validation to `auth-service` via network call, the same way as `plantify-msa-auth-refactor` `main`.
+| 서비스 | 역할 |
+| --- | --- |
+| `payment-service` | 결제 진입점, 결제/환불/취소 흐름 조율, Payment 상태 관리, `PaymentApproved` 발행 |
+| `pay-service` | Pay 잔액, 포인트, 정산 기록, Ledger 락, `PaymentApproved` 소비 후 포인트 적립 |
+| `transaction-service` | Transaction PENDING 생성, COMPLETED/FAILED/REFUNDED/CANCELLED 상태 전이 |
+| `experiments/k6` | 중복 결제, 동일 사용자 동시 결제, 다중 사용자 결제 검증 스크립트 |
 
-```text
-payment-service / pay-service
-  -> JwtFilter
-      -> auth-service /v1/auth/validate-token
-```
-
-JWKS local validation is not applied here. `transaction-service` is an internal server and skips JWT validation entirely; the caller passes the verified user identifier in the request body.
-
-## Refactor Flow
-
-```text
-Payment initiate
-  payment-service -> transaction-service: PENDING 생성
-  payment-service: Payment PENDING 저장
-
-Payment confirm
-  payment-service -> transaction-service: PENDING 조회/검증
-  payment-service -> pay-service: Ledger debit
-  payment-service -> transaction-service: COMPLETED 확정
-  payment-service: Payment APPROVED 저장
-  payment-service -> Kafka: PaymentApproved 발행
-
-Post-payment follow-up
-  pay-service <- Kafka: PaymentApproved 소비
-  pay-service: 포인트 적립 및 settlement REWARDED 처리
-```
-
-Failure and expiration are also orchestrated by `payment-service`:
-
-```text
-Ledger debit 실패
-  -> Payment FAILED
-  -> Transaction FAILED
-
-Transaction confirm 실패
-  -> Pay credit 보상
-  -> Payment FAILED
-  -> Transaction FAILED
-
-Payment PENDING 만료
-  -> payment-service scheduler
-  -> Transaction FAILED
-  -> Payment FAILED
-```
-
-## Local Run
-
-Start local infrastructure and all three services:
+## 로컬 실행
 
 ```bash
-docker compose up --build redis zookeeper kafka pay-service transaction-service payment-service
+docker compose up --build redis-1 redis-2 redis-3 zookeeper kafka pay-service transaction-service payment-service
 ```
 
-`auth-service` is not included in this repository. At runtime, `AUTH_SERVICE_URL` defaults to `http://host.docker.internal:8081`.
-In the provided Docker Compose environment, `mock-auth` replaces auth-service for local consistency tests. `pay-service` listens on `8082` inside the Docker network and is exposed as `18082` on the host to avoid local port conflicts.
+`auth-service`는 이 저장소에 포함하지 않음.
+로컬 실험에서는 `mock-auth`가 auth-service 역할을 대신함
 
-Verify compilation per service:
+컴파일 확인:
 
 ```bash
 ./gradlew compileJava
 ```
 
-Run consistency experiment scripts (available on `refactor/payment-orchestration-saga` only):
+## 실험 실행
+
+동일 `orderId` 중복 결제 진입 테스트:
 
 ```bash
 docker compose --profile test run --rm k6 run /scripts/duplicate-transaction.js
+```
+
+동일 사용자 동시 결제 테스트:
+
+```bash
+docker compose restart pay-service
 docker compose --profile test run --rm k6 run /scripts/concurrent-payment-same-user.js
+```
+
+서로 다른 사용자 결제 테스트:
+
+```bash
 docker compose --profile test run --rm k6 run /scripts/multi-user-payment.js
 ```
 
-## CI/CD
+## 문서
 
-This repository currently has CI only. There is no CD target because this lab does not deploy to AWS/EKS yet.
-
-## Docs
-
-- [Architecture overview](docs/architecture-overview.md)
-- [Design history](docs/design-history.md)
-- [Consistency strategy](docs/consistency-strategy.md)
-- [Package responsibilities](docs/package-responsibilities.md)
-- [API response convention](docs/api-response-convention.md)
-- [API spec](docs/api-spec.md)
-- [Baseline sequence](docs/baseline-sequence.md)
-- [Refactor target sequence](docs/refactor-target-sequence.md)
-- [Concurrency test plan](docs/concurrency-test-plan.md)
-- [Idempotency test plan](docs/idempotency-test-plan.md)
-- [Failure scenario test plan](docs/failure-scenario-test-plan.md)
-- [Test report](docs/test-report.md)
+- [Architecture](docs/architecture.md)
+- [Consistency and Tests](docs/consistency-and-tests.md)
