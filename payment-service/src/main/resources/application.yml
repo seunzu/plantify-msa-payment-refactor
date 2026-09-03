@@ -48,3 +48,13 @@ jwt:
 
 server:
   port: ${PAYMENT_SERVER_PORT:8084}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
