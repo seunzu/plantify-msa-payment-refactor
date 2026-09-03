@@ -21,22 +21,6 @@ redisson:
       - ${REDISSON_REDIS_2:redis://localhost:6380}
       - ${REDISSON_REDIS_3:redis://localhost:6381}
 
-auth:
-  service:
-    url: ${AUTH_SERVICE_URL:http://localhost:8081}
-pay:
-  service:
-    url: ${PAY_SERVICE_URL:http://localhost:8082}
-transaction:
-  service:
-    url: ${TRANSACTION_SERVICE_URL:http://localhost:8083}
-
-client:
-  base:
-    url: ${CLIENT_BASE_URL:http://localhost:3000}
-  pay:
-    url: ${CLIENT_PAY_URL:http://localhost:3000/payments}
-
 server:
   port: ${PAYMENT_SERVER_PORT:8084}
 

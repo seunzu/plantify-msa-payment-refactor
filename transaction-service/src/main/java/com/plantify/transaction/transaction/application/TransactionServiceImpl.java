@@ -66,6 +66,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             PaymentRequest paymentRequest = new PaymentRequest(
+                    transaction.getUserId(),
                     transaction.getTransactionId(),
                     transaction.getOrderId(),
                     transaction.getOrderName(),
