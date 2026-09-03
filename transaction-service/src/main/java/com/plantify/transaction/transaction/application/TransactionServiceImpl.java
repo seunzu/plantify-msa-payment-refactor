@@ -18,7 +18,6 @@ import org.redisson.api.RLock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -38,13 +37,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() ->
                         new ApplicationException(TransactionErrorCode.TRANSACTION_NOT_FOUND));
         return TransactionResponse.from(transaction);
-    }
-
-    @Override
-    public boolean existTransaction(Long userId, String orderId, List<Status> statuses) {
-        return transactionRepository.existsByUserIdAndOrderIdAndStatusIn(
-                userId, orderId, statuses
-        );
     }
 
     // PENDING 트랜잭션

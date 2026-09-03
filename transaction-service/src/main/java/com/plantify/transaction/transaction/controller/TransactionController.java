@@ -4,13 +4,10 @@ import com.plantify.transaction.transaction.dto.request.PayTransactionRequest;
 import com.plantify.transaction.transaction.dto.request.TransactionRequest;
 import com.plantify.transaction.transaction.dto.request.UpdateTransactionRequest;
 import com.plantify.transaction.transaction.dto.response.TransactionResponse;
-import com.plantify.transaction.transaction.domain.Status;
 import com.plantify.transaction.global.response.ApiResponse;
 import com.plantify.transaction.transaction.application.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,12 +21,6 @@ public class TransactionController {
     public ApiResponse<TransactionResponse> getTransactionById(@PathVariable Long transactionId) {
         TransactionResponse response = transactionService.getTransactionById(transactionId);
         return ApiResponse.ok(response);
-    }
-
-    // 트랜잭션 존재 여부 확인
-    @GetMapping("/exist")
-    public boolean existTransaction(@RequestParam Long userId, @RequestParam String orderId, @RequestParam List<Status> statusList) {
-        return transactionService.existTransaction(userId, orderId, statusList);
     }
 
     // 대기 트랜잭션 생성(PENDING)
