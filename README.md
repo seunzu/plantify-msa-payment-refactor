@@ -1,18 +1,17 @@
 # plantify-msa-payment-refactor
 
-Spring Boot MSA 기반 자체 Pay 결제 시스템의 책임 분리 리팩터링 실험 레포
+Spring Boot MSA 환경에서 자체 Pay 결제 흐름의 책임 분리를 비교하는 로컬 실험 레포
 
 - Baseline (`main`, v2): `pay-service`가 결제 진입점, 오케스트레이터, Ledger를 함께 담당
 - Refactor target (`refactor/payment-orchestration-saga`, v3): `payment-service`가 결제 흐름을 조율하고 `pay-service`는 Ledger 변경에 집중
 
 ## 핵심 변경
 
-- `payment-service`를 자체 PG 오케스트레이터로 배치
+- `payment-service`를 자체 PG 성격의 결제 진입점/오케스트레이터로 배치
 - `pay-service`를 잔액, 포인트, 정산 Ledger 책임으로 축소
 - `transaction-service`를 거래 생성과 최종 상태 전이 책임으로 정리
-- `orderId` unique constraint로 중복 결제 진입 방지
-- `PaySettlement.transactionId`로 Ledger 중복 차감 방어
-- `ledger:{userId}` Redis lock으로 동일 사용자 금전 변경 직렬화
+- `orderId`, `transactionId` 기반으로 중복 결제와 중복 차감 방어
+- `ledger:{userId}` Redis lock으로 동일 사용자 잔액 변경 직렬화
 - Transaction confirm 실패 시 Pay credit 보상 시도
 
 ## 서비스
@@ -30,7 +29,7 @@ Spring Boot MSA 기반 자체 Pay 결제 시스템의 책임 분리 리팩터링
 docker compose up --build redis-1 redis-2 redis-3 zookeeper kafka pay-service transaction-service payment-service
 ```
 
-`auth-service`는 이 저장소에 포함하지 않음.
+`auth-service`는 이 저장소에 포함하지 않음
 로컬 실험에서는 `mock-auth`가 auth-service 역할을 대신함
 
 컴파일 확인:
