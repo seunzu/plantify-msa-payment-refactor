@@ -7,7 +7,7 @@ import com.plantify.pay.ledger.dto.process.UpdateTransactionRequest;
 import com.plantify.pay.settlement.domain.PaySettlement;
 import com.plantify.pay.ledger.domain.Status;
 import com.plantify.pay.ledger.application.ledger.LedgerService;
-import com.plantify.pay.settlement.application.PaySettlementDomainService;
+import com.plantify.pay.settlement.application.PaySettlementCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class RefundOrchestrator {
 
     private final LedgerService ledgerService;
     private final TransactionServiceClient transactionClient;
-    private final PaySettlementDomainService paySettlementService;
+    private final PaySettlementCommandService paySettlementCommandService;
 
     @Transactional
     public ProcessPaymentResponse execute(UpdateTransactionRequest request) {
@@ -29,7 +29,7 @@ public class RefundOrchestrator {
                 transactionClient.updateTransactionToRefund(request).data();
 
         PaySettlement settlement =
-                paySettlementService.updateSettlementStatus(
+                paySettlementCommandService.updateSettlementStatus(
                         request.orderId(), Status.REFUND
                 );
 

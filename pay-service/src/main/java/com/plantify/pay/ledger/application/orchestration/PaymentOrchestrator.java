@@ -6,7 +6,7 @@ import com.plantify.pay.settlement.dto.PaySettlementRequest;
 import com.plantify.pay.ledger.domain.Status;
 import com.plantify.pay.config.JwtProvider;
 import com.plantify.pay.ledger.application.ledger.LedgerService;
-import com.plantify.pay.settlement.application.PaySettlementDomainService;
+import com.plantify.pay.settlement.application.PaySettlementCommandService;
 import com.plantify.pay.global.util.UserInfoProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ public class PaymentOrchestrator {
 
     private final LedgerService ledgerService;
     private final TransactionServiceClient transactionClient;
-    private final PaySettlementDomainService paySettlementService;
+    private final PaySettlementCommandService paySettlementCommandService;
     private final JwtProvider jwtProvider;
     private final UserInfoProvider userInfoProvider;
 
@@ -42,13 +42,27 @@ public class PaymentOrchestrator {
                 transactionClient.getTransactionById(transactionId).data();
 
         long finalAmount = tx.amount() - pointToUse;
-        ledgerService.debit(tx.userId(), finalAmount, pointToUse);
+        boolean debited = false;
+        boolean transactionConfirmed = false;
 
-        transactionClient.updateTransactionToSuccess(
-                new PayTransactionRequest(transactionId)
-        );
+        try {
+            ledgerService.debit(tx.userId(), finalAmount, pointToUse);
+            debited = true;
 
-        paySettlementService.savePaySettlement(
+            transactionClient.updateTransactionToSuccess(
+                    new PayTransactionRequest(transactionId)
+            );
+            transactionConfirmed = true;
+        } catch (Exception e) {
+            if (debited && !transactionConfirmed) {
+                log.warn("Payment compensation started. transactionId={}, userId={}",
+                        transactionId, tx.userId(), e);
+                ledgerService.credit(tx.userId(), finalAmount, pointToUse);
+            }
+            throw e;
+        }
+
+        paySettlementCommandService.savePaySettlement(
                 new PaySettlementRequest(
                         tx.userId(),
                         tx.orderId(),

@@ -5,7 +5,7 @@ import com.plantify.pay.global.exception.ApplicationException;
 import com.plantify.pay.global.exception.errorcode.PayErrorCode;
 import com.plantify.pay.global.util.LockProvider;
 import com.plantify.pay.ledger.repository.PayRepository;
-import com.plantify.pay.point.application.PointDomainService;
+import com.plantify.pay.point.application.PointCommandService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class LedgerServiceImpl implements LedgerService {
 
     private final PayRepository payRepository;
-    private final PointDomainService pointService;
+    private final PointCommandService pointCommandService;
     private final LockProvider lockProvider;
 
     // 결제/포인트 차감
@@ -34,7 +34,7 @@ public class LedgerServiceImpl implements LedgerService {
             payRepository.save(pay);
 
             if (pointToUse > 0) {
-                pointService.usePoints(userId, pointToUse);
+                pointCommandService.usePoints(userId, pointToUse);
             }
         });
     }
@@ -51,7 +51,7 @@ public class LedgerServiceImpl implements LedgerService {
             payRepository.save(pay);
 
             if (point > 0) {
-                pointService.addPoints(userId, point);
+                pointCommandService.addPoints(userId, point);
             }
         });
     }
@@ -61,20 +61,8 @@ public class LedgerServiceImpl implements LedgerService {
     public void reward(Long userId, long rewardPoint) {
         withLedgerLock(userId, () -> {
             if (rewardPoint > 0) {
-                pointService.addPoints(userId, rewardPoint);
+                pointCommandService.addPoints(userId, rewardPoint);
             }
-        });
-    }
-
-    @Override
-    @Transactional
-    public void fail(Long userId) {
-        withLedgerLock(userId, () -> {
-            Pay pay = payRepository.findByUserId(userId)
-                    .orElseThrow(() -> new ApplicationException(PayErrorCode.PAY_NOT_FOUND))
-                    .fail();
-
-            payRepository.save(pay);
         });
     }
 

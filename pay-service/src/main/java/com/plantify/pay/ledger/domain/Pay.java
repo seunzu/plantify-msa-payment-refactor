@@ -73,9 +73,4 @@ public class Pay extends BaseEntity {
         this.balance -= amount;
         return this;
     }
-
-    public Pay fail(){
-        this.status = Status.FAILED;
-        return this;
-    }
 }

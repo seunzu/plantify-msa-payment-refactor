@@ -26,10 +26,4 @@ public class PayTransactionStatusServiceImpl implements PayTransactionStatusServ
 
         ledgerService.reward(message.userId(), rewardPoints);
     }
-
-    // 실패
-    @Override
-    public void processFailedTransaction(TransactionStatusMessage message) {
-        ledgerService.fail(message.userId());
-    }
 }

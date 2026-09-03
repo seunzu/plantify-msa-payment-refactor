@@ -9,6 +9,5 @@ public enum Status implements Serializable {
     PAYMENT,
     REFUND,
     CANCELLATION,
-    SUCCESS,
-    FAILED
+    SUCCESS
 }

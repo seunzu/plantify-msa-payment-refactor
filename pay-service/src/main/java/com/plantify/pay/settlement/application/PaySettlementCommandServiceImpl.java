@@ -1,6 +1,5 @@
 package com.plantify.pay.settlement.application;
 
-import com.plantify.pay.ledger.dto.ExternalSettlementResponse;
 import com.plantify.pay.settlement.dto.PaySettlementRequest;
 import com.plantify.pay.ledger.domain.Pay;
 import com.plantify.pay.settlement.domain.PaySettlement;
@@ -16,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class PaySettlementDomainServiceImpl implements PaySettlementDomainService {
+public class PaySettlementCommandServiceImpl implements PaySettlementCommandService {
 
     private final PaySettlementRepository paySettlementRepository;
     private final PayRepository payRepository;
@@ -30,13 +29,6 @@ public class PaySettlementDomainServiceImpl implements PaySettlementDomainServic
 
         PaySettlement savedPaySettlement = request.toEntity(pay);
         paySettlementRepository.save(savedPaySettlement);
-    }
-
-    @Override
-    public ExternalSettlementResponse getSettlementByOrderId(String orderId) {
-        PaySettlement paySettlement = paySettlementRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new ApplicationException(SettlementErrorCode.PAY_SETTLEMENT_NOT_FOUND));
-        return ExternalSettlementResponse.from(paySettlement);
     }
 
     @Override

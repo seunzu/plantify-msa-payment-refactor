@@ -25,7 +25,6 @@ public class PayConsumer {
         try {
             switch (message.status()) {
                 case PAYMENT -> payTransactionStatusService.processSuccessfulTransaction(message);
-                case FAILED -> payTransactionStatusService.processFailedTransaction(message);
                 default -> log.warn("Unknown status: {}", message.status());
             }
         } catch (Exception e) {
@@ -33,4 +32,3 @@ public class PayConsumer {
         }
     }
 }
-

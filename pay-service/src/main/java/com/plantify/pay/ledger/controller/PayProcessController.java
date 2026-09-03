@@ -1,7 +1,6 @@
 package com.plantify.pay.ledger.controller;
 
 import com.plantify.pay.ledger.dto.process.*;
-import com.plantify.pay.ledger.dto.PayBalanceResponse;
 import com.plantify.pay.global.response.ApiResponse;
 import com.plantify.pay.ledger.application.facade.PayFacadeService;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +22,11 @@ public class PayProcessController {
         return paymentResponse.token();
     }
 
-    // 트랜잭션 상태 검증
-    @GetMapping("/payment/verify")
-    public ApiResponse<TransactionStatusResponse> getTransactionStatus(
+    // 결제 페이지 진입 정보 조회
+    @GetMapping("/payment/checkout")
+    public ApiResponse<TransactionStatusResponse> getPaymentCheckout(
             @RequestHeader String token) {
-        TransactionStatusResponse status = payFacadeService.getTransactionStatus(token);
+        TransactionStatusResponse status = payFacadeService.getPaymentCheckout(token);
         return ApiResponse.ok(status);
     }
 
@@ -52,10 +51,4 @@ public class PayProcessController {
         return ApiResponse.ok(response);
     }
 
-    // 페이 잔액과 금액 비교
-    @PostMapping("/check")
-    public ApiResponse<PayBalanceResponse> checkPayBalance(@RequestBody PayBalanceRequest request) {
-        PayBalanceResponse response = payFacadeService.checkPayBalance(request);
-        return ApiResponse.ok(response);
-    }
 }
