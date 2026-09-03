@@ -1,7 +1,3 @@
-// Concurrency test: same user, 5 simultaneous payments of 200,000 each
-// Seed: userId=1, balance=500,000
-// Expected: at most 2 succeed (2 × 200,000 = 400,000 ≤ 500,000), rest fail with INSUFFICIENT_BALANCE
-// Validates: ledger:{userId} Redis lock prevents overdraft
 import http from 'k6/http';
 import { check } from 'k6';
 
@@ -15,7 +11,7 @@ const AUTH_TOKEN = 'test-token';
 const AMOUNT = 200000;
 
 export default function () {
-  // 1. Initiate payment. payment-service creates Transaction PENDING internally.
+  // 1. 결제 진입: Transaction PENDING 생성
   const initRes = http.post(
     `${PAYMENT_BASE_URL}/v1/payments/initiate`,
     JSON.stringify({
@@ -38,7 +34,7 @@ export default function () {
   const token = initRes.json('data.token');
   if (!token) return;
 
-  // 2. Execute payment (concurrent debit — RedLock is the guard here)
+  // 2. 결제 실행: 동시에 debit을 요청하고 RedLock으로 잔액 변경을 보호
   const payRes = http.post(
     `${PAYMENT_BASE_URL}/v1/payments`,
     null,

@@ -1,4 +1,4 @@
-package com.plantify.pay.ledger.dto;
+package com.plantify.pay.settlement.dto;
 
 import com.plantify.pay.settlement.domain.PaySettlement;
 

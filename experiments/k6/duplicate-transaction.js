@@ -1,6 +1,3 @@
-// Idempotency test: 5 VUs send the same orderId simultaneously
-// Expected: exactly 1 returns 200, the rest return 409 (DUPLICATE_PAYMENT)
-// Validates: Transaction/Payment unique constraints prevent duplicate payment entry
 import http from 'k6/http';
 import { check } from 'k6';
 

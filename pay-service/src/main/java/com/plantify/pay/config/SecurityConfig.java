@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -32,15 +31,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/v1/admin/**",
                                 "/",
-                                "/v1/pay",
-                                "/v1/pay/payment",
-                                "/v1/pay/payment/verify",
-                                "/v1/pay/settlements/external",
-                                "/v1/pay/check",
-                                "/v1/pay/refund",
-                                "/v1/pay/cancellation",
                                 "/v1/pay/debit",
                                 "/v1/pay/credit"
                         ).permitAll()

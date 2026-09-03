@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class PointServiceImpl implements PointService {
+public class PointQueryServiceImpl implements PointQueryService {
 
     private final PointRepository pointRepository;
     private final UserInfoProvider userInfoProvider;

@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class PointDomainServiceImpl implements PointDomainService {
+public class PointCommandServiceImpl implements PointCommandService {
 
     private final PointRepository pointRepository;
 

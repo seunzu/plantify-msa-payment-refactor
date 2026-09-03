@@ -6,7 +6,6 @@ public enum Status implements Serializable {
 
     // Pay 잔액 상태
     CHARGE,     // 충전
-    FAILED,     // 처리 실패
 
     // PaySettlement 상태
     APPROVED,   // 결제 완료

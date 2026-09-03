@@ -9,8 +9,8 @@ import com.plantify.pay.global.exception.ApplicationException;
 import com.plantify.pay.global.exception.errorcode.PayErrorCode;
 import com.plantify.pay.global.util.LockProvider;
 import com.plantify.pay.ledger.repository.PayRepository;
-import com.plantify.pay.settlement.application.PaySettlementDomainService;
-import com.plantify.pay.point.application.PointDomainService;
+import com.plantify.pay.settlement.application.PaySettlementCommandService;
+import com.plantify.pay.point.application.PointCommandService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
@@ -23,19 +23,19 @@ import java.util.concurrent.TimeUnit;
 public class LedgerServiceImpl implements LedgerService {
 
     private final PayRepository payRepository;
-    private final PaySettlementDomainService paySettlementDomainService;
-    private final PointDomainService pointService;
+    private final PaySettlementCommandService paySettlementCommandService;
+    private final PointCommandService pointCommandService;
     private final LockProvider lockProvider;
 
     // 결제 시 잔액 차감 + 포인트 차감
-    // 정산 기록은 PaySettlementDomainService에 위임
+    // 정산 기록은 PaySettlementCommandService에 위임
     @Override
     @Transactional
     public void debit(DebitRequest request) {
         withLedgerLock(request.userId(), () -> {
 
             // transactionId 기반 멱등성: 이미 처리된 요청이면 skip
-            if (paySettlementDomainService.existsByTransactionId(request.transactionId())) {
+            if (paySettlementCommandService.existsByTransactionId(request.transactionId())) {
                 return;
             }
 
@@ -47,10 +47,10 @@ public class LedgerServiceImpl implements LedgerService {
             payRepository.save(pay);
 
             if (request.pointToUse() > 0) {
-                pointService.usePoints(request.userId(), request.pointToUse());
+                pointCommandService.usePoints(request.userId(), request.pointToUse());
             }
 
-            paySettlementDomainService.savePaySettlement(
+            paySettlementCommandService.savePaySettlement(
                     new PaySettlementRequest(
                             request.transactionId(),
                             request.userId(),
@@ -76,7 +76,7 @@ public class LedgerServiceImpl implements LedgerService {
             payRepository.save(pay);
 
             if (request.point() > 0) {
-                pointService.addPoints(request.userId(), request.point());
+                pointCommandService.addPoints(request.userId(), request.point());
             }
         });
     }
@@ -87,7 +87,7 @@ public class LedgerServiceImpl implements LedgerService {
     public void reward(Long userId, long rewardPoint) {
         withLedgerLock(userId, () -> {
             if (rewardPoint > 0) {
-                pointService.addPoints(userId, rewardPoint);
+                pointCommandService.addPoints(userId, rewardPoint);
             }
         });
     }

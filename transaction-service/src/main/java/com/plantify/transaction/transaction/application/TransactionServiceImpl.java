@@ -14,8 +14,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -28,11 +26,6 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new ApplicationException(TransactionErrorCode.TRANSACTION_NOT_FOUND));
         return TransactionResponse.from(transaction);
-    }
-
-    @Override
-    public boolean existTransaction(Long userId, String orderId, List<Status> statuses) {
-        return transactionRepository.existsByUserIdAndOrderIdAndStatusIn(userId, orderId, statuses);
     }
 
     // PENDING 생성 — orderId 유니크 제약으로 중복 방지
